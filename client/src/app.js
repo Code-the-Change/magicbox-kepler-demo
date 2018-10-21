@@ -28,6 +28,7 @@ import KeplerGlSchema from 'kepler.gl/schemas';
 import Button from './button';
 import downloadJsonFile from "./file-download";
 import config from '../config'
+import map_config from '../../server/config.json'
 const client_url = location.origin; // will be something like http://localhost:8080
 const server_url = client_url.substr(0, client_url.length-4) + config.server_port; // change that to http://localhost:5000
 const KeplerGl = require('kepler.gl/components').injectComponents([
@@ -61,6 +62,20 @@ const GlobalStyleDiv = styled.div`
   }
 `;
 
+function form_config(obj) {
+  return {datasets: obj.datasets.map(s => { return {
+    info: {
+      id: s.data.id,
+      label: s.data.label,
+      color: s.data.color
+    },
+    data: {
+      fields: s.data.fields,
+      rows: s.data.allData
+    }
+  }}), config: obj.config}  
+}
+
 class App extends Component {
   state = {
     width: window.innerWidth,
@@ -82,22 +97,15 @@ class App extends Component {
     fetch(server_url + '/api/default')
       .then(res => res.json()) // transform the data into json
       .then(obj => {
-        let dataSets = {datasets: obj.datasets.map(s => { return {
-          info: {
-            id: s.data.id,
-            label: s.data.label,
-            color: s.data.color
-          },
-          data: {
-            fields: s.data.fields,
-            rows: s.data.allData
-          }
-        }}), config: obj.config}
-
+        let dataSets = form_config(obj)
         // addDataToMap action to inject dataset into kepler.gl instance
         this.props.dispatch(addDataToMap(dataSets))
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        let dataSets = form_config(map_config)
+        // addDataToMap action to inject dataset into kepler.gl instance
+        this.props.dispatch(addDataToMap(dataSets))
+    })
   }
 
   componentWillUnmount() {
