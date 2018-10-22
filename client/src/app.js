@@ -23,16 +23,28 @@ import styled from 'styled-components';
 import window from 'global/window';
 import {connect} from 'react-redux';
 import {loadSampleConfigurations} from './actions';
-import {replaceLoadDataModal} from './factories/load-data-modal';
+import CustomDataModal from './factories/load-data-modal';
+import {CustomPanelHeader} from './factories/custom-panel-header';
 import KeplerGlSchema from 'kepler.gl/schemas';
 import Button from './button';
 import downloadJsonFile from "./file-download";
-import config from '../config'
+import config from '../config';
+import {injectComponents, PanelHeaderFactory, LoadDataModalFactory} from 'kepler.gl/components';
+
+const myCustomHeaderFactory = () => CustomPanelHeader;
+const CustomLoadDataModalFactory = () => CustomDataModal
+
+const KeplerGl = injectComponents([
+  [PanelHeaderFactory, myCustomHeaderFactory],
+  [LoadDataModalFactory, CustomLoadDataModalFactory]
+]);
+
+
 const client_url = location.origin; // will be something like http://localhost:8080
 const server_url = client_url.substr(0, client_url.length-4) + config.server_port; // change that to http://localhost:5000
-const KeplerGl = require('kepler.gl/components').injectComponents([
-  replaceLoadDataModal()
-]);
+// const KeplerGl = require('kepler.gl/components').injectComponents([
+//   replaceLoadDataModal()
+// ]);
 
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
@@ -111,79 +123,6 @@ class App extends Component {
     });
   };
 
-  _loadSampleData() {
-    this.props.dispatch(
-      updateVisData(
-        // datasets
-        {
-          info: {
-            label: 'Sample Taxi Trips in New York City',
-            id: 'test_trip_data'
-          },
-          data: sampleTripData
-        },
-        // option
-        {
-          centerMap: true,
-          readOnly: false
-        },
-        // config
-        {
-          filters: [
-            {
-              id: 'me',
-              dataId: 'test_trip_data',
-              name: 'tpep_pickup_datetime',
-              type: 'timeRange',
-              enlarged: true
-            }
-          ]
-        }
-      )
-    );
-
-    // load icon data and config and process csv file
-    this.props.dispatch(
-      addDataToMap({
-        datasets: [
-          {
-            info: {
-              label: 'Icon Data',
-              id: 'test_icon_data'
-            },
-            data: Processors.processCsvData(sampleIconCsv)
-          }
-        ],
-        options: {
-          centerMap: false
-        },
-        config: savedMapConfig
-      })
-    );
-
-    // load geojson
-    this.props.dispatch(
-      updateVisData({
-        info: {label: 'SF Zip Geo'},
-        data: Processors.processGeojson(sampleGeojson)
-      })
-    );
-
-    // load h3 hexagon
-    this.props.dispatch(
-      addDataToMap({
-        datasets: [
-          {
-            info: {
-              label: 'H3 Hexagons V2',
-              id: 'h3-hex-id'
-            },
-            data: Processors.processCsvData(sampleH3Data)
-          }
-        ]
-      })
-    );
-  }
   // This method is used as reference to show how to export the current kepler.gl instance configuration
   // Once exported the configuration can be imported using parseSavedConfig or load method from KeplerGlSchema
   getMapConfig() {
