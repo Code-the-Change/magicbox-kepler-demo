@@ -17,26 +17,43 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import React, {Component} from 'react';
+import {CurrentCountryList} from '../components/load-data-modal/current-country-list'
 
-import {LoadDataModalFactory} from 'kepler.gl/components';
-import LoadDataModal from '../components/load-data-modal/load-data-modal';
-import {withState} from 'kepler.gl/components';
 
-import {
-  loadSampleMap,
-  setLoadingMethod
-} from '../actions';
+export default class CustomDataModal extends React.Component {
+  constructor(props){
+    super(props)
 
-export const CustomLoadDataModalFactory = () =>
-  withState(
-    [],
-    state => ({...state.demo.app}),
-    {
-      onSetLoadingMethod: setLoadingMethod,
-      onLoadSampleData: loadSampleMap
+    this.state = {
+      currentCountry: '',
+      currentAdminSelection: ''
     }
-  )(LoadDataModal);
+  }
 
-export function replaceLoadDataModal() {
-  return [LoadDataModalFactory, CustomLoadDataModalFactory];
-}
+  handleChange = (event) => {
+    const countryName = event.target.name
+    const adminSelection = event.target.value
+    // console.log("question id", questionID, "question response", questionResponse)
+    this.setState({
+      currentCountry: countryName,
+      currentAdminSelection: adminSelection
+    })
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+     console.log("submitting", countryName, adminSelection)
+    //fetch will go here
+    }
+
+  render(){
+    return(
+      <div>
+        <h2>Select Datasets from Magic Box</h2>
+          <h4>Pick the country and administrative level for your map</h4>
+          <CurrentCountryList />
+        </div>
+    )
+    }
+  }
