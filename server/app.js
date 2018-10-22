@@ -5,6 +5,7 @@ const config = require('./config')
 const bodyParser = require('body-parser');
 const jsonfile = require('jsonfile')
 
+app.disable('etag');
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
@@ -29,6 +30,7 @@ router.get('/default', function(req, res) {
 
 router.route('/save')
     .post(function(req, res) {
+      res.header('Cache-Control', 'no-cache');
       jsonfile.writeFile('config.json', req.body, err => {
         if (err) {
           res.send({message: 'Could not save'})
